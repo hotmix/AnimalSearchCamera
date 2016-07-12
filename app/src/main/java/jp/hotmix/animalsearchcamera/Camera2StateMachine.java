@@ -58,7 +58,6 @@ public class Camera2StateMachine {
         nextState(mAbortState);
     }
 
-    // ----------------------------------------------------------------------------------------
     // The following private
     private void shutdown() {
         if (null != mCaptureSession) {
