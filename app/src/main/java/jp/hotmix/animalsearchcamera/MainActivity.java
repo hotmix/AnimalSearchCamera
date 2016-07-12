@@ -1,53 +1,68 @@
 package jp.hotmix.animalsearchcamera;
 
+
+import java.nio.ByteBuffer;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
+import android.media.ImageReader;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity {
+    private AutoFitTextureView mTextureView;
+    private ImageView mImageView;
+    private Camera2StateMachine mCamera2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        mTextureView = (AutoFitTextureView) findViewById(R.id.textureView);
+        mImageView = (ImageView) findViewById(R.id.imageView);
+        mCamera2 = new Camera2StateMachine();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mCamera2.open(this, mTextureView);
+    }
+    @Override
+    protected void onPause() {
+        mCamera2.close();
+        super.onPause();
+    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && mImageView.getVisibility() == View.VISIBLE) {
+            mTextureView.setVisibility(View.VISIBLE);
+            mImageView.setVisibility(View.INVISIBLE);
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+    public void onClickShutter(View view) {
+        mCamera2.takePicture(new ImageReader.OnImageAvailableListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onImageAvailable(ImageReader reader) {
+                // 撮れた画像をImageViewに貼り付けて表示。
+                final Image image = reader.acquireLatestImage();
+                ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                byte[] bytes = new byte[buffer.remaining()];
+                buffer.get(bytes);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                image.close();
 
+                mImageView.setImageBitmap(bitmap);
+                mImageView.setVisibility(View.VISIBLE);
+                mTextureView.setVisibility(View.INVISIBLE);
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }
