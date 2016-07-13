@@ -8,14 +8,24 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:id="@+id/cameraView"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="jp.hotmix.animalsearchcamera.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <jp.hotmix.animalsearchcamera.AutoFitTextureView
+        android:id="@+id/textureView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        android:visibility="gone" />
     <ImageButton
-        android:id="@+id/imageButton"
+        android:id="@+id/imageButton1"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:onClick="onClickShutter"
